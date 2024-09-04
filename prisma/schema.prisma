@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          String        @id @default(cuid())
+  name        String
+  username    String
+  password    String
+  userAttends userAttends[]
+  auth        auth?
+  Salary      Salary[]
+}
+
+model userAttends {
+  id         String    @id @default(cuid())
+  userid     String
+  clockIn    DateTime
+  clockOut   DateTime?
+  totalHours String?
+  imgClockIn String?
+  users      Users?    @relation(references: [id], fields: [userid], onDelete: Cascade)
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  name     String
+  username String
+  password String
+  auth     auth?
+}
+
+model auth {
+  id      String  @id @default(cuid())
+  jwt     String  @db.LongText
+  isLogin Boolean
+  userId  String? @unique
+  adminid String? @unique
+  admins  Admin?  @relation(references: [id], fields: [adminid], onDelete: Cascade)
+  users   Users?  @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model Setting {
+  id               String   @id @default(cuid())
+  time_clockIn     DateTime
+  location_clockIn String
+  late_fine        Int
+}
+
+model Salary {
+  id     String   @id @default(cuid())
+  date   DateTime
+  total  Float
+  userId String
+  users  Users    @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
